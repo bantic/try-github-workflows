@@ -36,6 +36,10 @@ jobs:
         run: echo "cancelled"
       - if: always()
         run: echo "always"
+      - if: ${{ needs.a-shard.result == 'failure' }}
+        run: |
+          echo "failing because b-shard failed"
+          exit 1
       - if: failure()
         run: |
           echo "failure"
@@ -61,6 +65,10 @@ jobs:
         run: echo "cancelled"
       - if: always()
         run: echo "always"
+      - if: ${{ needs.b-shard.result == 'failure' }}
+        run: |
+          echo "failing because b-shard failed"
+          exit 1
       - if: failure()
         run: |
           echo "failure"
