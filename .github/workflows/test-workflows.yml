@@ -44,28 +44,6 @@ jobs:
     if: ${{ failure() }}
     steps:
       - run: echo "a-shard failed" && exit 1
-      # - run: echo a-shard-result=${{ needs.a-shard.result }}
-      # - if: success()
-      #   run: echo "success"
-      # - if: cancelled()
-      #   run: echo "cancelled"
-      # - if: always()
-      #   run: echo "always"
-      # - if: ${{ needs.a-shard.result == 'failure' }}
-      #   run: |
-      #     echo "failing because b-shard failed"
-      #     exit 1
-      # - if: failure()
-      #   run: |
-      #     echo "failure"
-      #     exit 1
-
-  a-shard-did-fail:
-    needs: [a-shard]
-    runs-on: ubuntu-latest
-    if: ${{ failure() }}
-    steps:
-      - run: exit 1
 
   b-shard:
     needs: [configure]
@@ -90,28 +68,6 @@ jobs:
     if: ${{ failure() }}
     steps:
       - run: echo "b-shard failed" && exit 1
-      # - run: echo b-shard-result=${{ needs.b-shard.result }}
-      # - if: success()
-      #   run: echo "success"
-      # - if: cancelled()
-      #   run: echo "cancelled"
-      # - if: always()
-      #   run: echo "always"
-      # - if: ${{ needs.b-shard.result == 'failure' }}
-      #   run: |
-      #     echo "failing because b-shard failed"
-      #     exit 1
-      # - if: failure()
-      #   run: |
-      #     echo "failure"
-      #     exit 1
-
-  b-shard-did-fail:
-    needs: [b-shard]
-    runs-on: ubuntu-latest
-    if: ${{ failure() }}
-    steps:
-      - run: exit 1
 
   roll-up-all:
     runs-on: ubuntu-latest
