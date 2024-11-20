@@ -23,7 +23,7 @@ jobs:
           echo "run_rollup_all=true" >> "$GITHUB_OUTPUT"
           echo "run_a=true" >> "$GITHUB_OUTPUT"
           echo "run_b=true" >> "$GITHUB_OUTPUT"
-          echo "fail_a_number=" >> "$GITHUB_OUTPUT"
+          echo "fail_a_number=1" >> "$GITHUB_OUTPUT"
           echo "fail_b_number=" >> "$GITHUB_OUTPUT"
       - run: sleep 3
 
