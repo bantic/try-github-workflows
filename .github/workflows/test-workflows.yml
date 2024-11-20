@@ -3,9 +3,11 @@ on:
 jobs:
   configure:
     runs-on: ubuntu-latest
+    outputs:
+      run_rollup_all: ${{steps.run_rollup_all.outputs.run_rollup_all}}
     steps:
-      - run: echo "hello"
-      - run: echo "hello again"
+      - id: run_rollup_all
+        run: echo "run_rollup_all=true" >> "$GITHUB_OUTPUT"
 
   a-shard:
     runs-on: ubuntu-latest
@@ -13,7 +15,14 @@ jobs:
       matrix:
         number: [1, 2]
     steps:
-      - run: echo ${{ matrix.number }}
+      - run: |
+          echo ${{ matrix.number }}
+          if [[ "${{ matrix.number }}" == "2" ]]; then
+            echo "failing shard ${{ matrix.number}}"
+            exit 1
+          else
+              echo "passing shard ${{ matrix.number }}"
+          fi
 
   roll-up-a:
     needs: [a-shard]
@@ -57,8 +66,8 @@ jobs:
 
   roll-up-all:
     runs-on: ubuntu-latest
-    needs: [roll-up-a, roll-up-b]
-    if: ${{ !cancelled() }}
+    needs: [roll-up-a, roll-up-b, configure]
+    if: ${{ !cancelled() && needs.configure.outputs.run_rollup_all == 'true' }}
     steps:
       - if: failure()
         run: echo "failure"
