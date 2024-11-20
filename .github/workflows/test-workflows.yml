@@ -7,8 +7,11 @@ jobs:
   configure:
     runs-on: ubuntu-latest
     outputs:
+      # set to "true" to run the rollup-all
       run_rollup_all: ${{steps.run_rollup_all.outputs.run_rollup_all}}
+      # set to "true" to run a-shard
       run_a: ${{steps.run_rollup_all.outputs.run_a}}
+      # set to "true" to run b-shard
       run_b: ${{steps.run_rollup_all.outputs.run_b}}
       # set fail_a_number to the shard number (if desired) that should fail
       fail_a_number: ${{steps.run_rollup_all.outputs.fail_a_number}}
@@ -19,8 +22,8 @@ jobs:
         run: |
           echo "run_rollup_all=true" >> "$GITHUB_OUTPUT"
           echo "run_a=true" >> "$GITHUB_OUTPUT"
-          echo "run_b=false" >> "$GITHUB_OUTPUT"
-          echo "fail_a_number=" >> "$GITHUB_OUTPUT"
+          echo "run_b=true" >> "$GITHUB_OUTPUT"
+          echo "fail_a_number=1" >> "$GITHUB_OUTPUT"
           echo "fail_b_number=" >> "$GITHUB_OUTPUT"
       - run: sleep 3
 
@@ -29,6 +32,7 @@ jobs:
     needs: [configure]
     if: ${{ needs.configure.outputs.run_a == 'true' }}
     strategy:
+      fail-fast: false
       matrix:
         number: [1, 2]
     steps:
@@ -53,6 +57,7 @@ jobs:
     if: ${{ needs.configure.outputs.run_b == 'true' }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         number: [1, 2]
     steps:
