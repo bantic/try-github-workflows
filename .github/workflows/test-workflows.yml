@@ -30,15 +30,17 @@ jobs:
   test-step-status:
     runs-on: ubuntu-latest
     steps:
-      - run: echo hello
+      - run: echo hi
       - if: success()
-        run: "success runs bc nothing has failed yet"
+        run: echo "this runs because all prev steps in this job succeeded"
       - run: exit 1
-      - if: always()
-        run: echo "always runs"
       - if: failure()
-        run: echo "failure runs"
-      - run: echo "does not run because failure"
+        run: echo "this will run because some prev step failed"
+      - if: always()
+        run: echo "this runs too"
+      - if: success()
+        run: echo "this does not run bc a prev step failed"
+      - run: echo "this does not run either bc a prev step failed"
 
   a-shard:
     runs-on: ubuntu-latest
