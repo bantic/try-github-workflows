@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
+      - run: echo a-shard-result=${{ needs.a-shard.result }}
       - if: success()
         run: echo "success"
       - if: cancelled()
@@ -53,6 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
+      - run: echo b-shard-result=${{ needs.b-shard.result }}
       - if: success()
         run: echo "success"
       - if: cancelled()
@@ -69,6 +71,8 @@ jobs:
     needs: [roll-up-a, roll-up-b, configure]
     if: ${{ !cancelled() && needs.configure.outputs.run_rollup_all == 'true' }}
     steps:
+      - run: echo rollup-a-result=${{ needs.roll-up-a.result }}
+      - run: echo rollup-b-result=${{ needs.roll-up-b.result }}
       - if: failure()
         run: echo "failure"
       - if: success()
