@@ -45,6 +45,13 @@ jobs:
           echo "failure"
           exit 1
 
+  a-shard-did-fail:
+    needs: [a-shard]
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - run: exit 1
+
   b-shard:
     runs-on: ubuntu-latest
     strategy:
@@ -73,6 +80,13 @@ jobs:
         run: |
           echo "failure"
           exit 1
+
+  b-shard-did-fail:
+    needs: [b-shard]
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - run: exit 1
 
   roll-up-all:
     runs-on: ubuntu-latest
