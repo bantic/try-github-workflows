@@ -7,12 +7,18 @@ jobs:
       run_rollup_all: ${{steps.run_rollup_all.outputs.run_rollup_all}}
       run_a: ${{steps.run_rollup_all.outputs.run_a}}
       run_b: ${{steps.run_rollup_all.outputs.run_b}}
+      # set fail_a_number to the shard number (if desired) that should fail
+      fail_a_number: ${{steps.run_rollup_all.outputs.fail_a_number}}
+      # set fail_b_number to the shard number (if desired) that should fail
+      fail_b_number: ${{steps.run_rollup_all.outputs.fail_b_number}}
     steps:
       - id: run_rollup_all
         run: |
           echo "run_rollup_all=true" >> "$GITHUB_OUTPUT"
           echo "run_a=true" >> "$GITHUB_OUTPUT"
           echo "run_b=true" >> "$GITHUB_OUTPUT"
+          echo "fail_a_number=" >> "$GITHUB_OUTPUT"
+          echo "fail_b_number=" >> "$GITHUB_OUTPUT"
       - run: sleep 30
 
   a-shard:
@@ -25,7 +31,7 @@ jobs:
     steps:
       - run: |
           echo ${{ matrix.number }}
-          if [[ "${{ matrix.number }}" == "2" ]]; then
+          if [[ "${{ matrix.number }}" == "${{ needs.configure.outputs.fail_a_number }}" ]]; then
             echo "failing shard ${{ matrix.number}}"
             exit 1
           else
@@ -69,7 +75,14 @@ jobs:
       matrix:
         number: [1, 2]
     steps:
-      - run: echo ${{ matrix.number }}
+      - run: |
+          echo ${{ matrix.number }}
+          if [[ "${{ matrix.number }}" == "${{ needs.configure.outputs.fail_b_number }}" ]]; then
+            echo "failing shard ${{ matrix.number}}"
+            exit 1
+          else
+              echo "passing shard ${{ matrix.number }}"
+          fi
 
   roll-up-b:
     needs: [b-shard]
