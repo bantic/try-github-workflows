@@ -1,0 +1,14 @@
+on:
+  pull_request:
+  push:
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "github.ref_name=${{ github.ref_name }}"
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          # Replace slash(es) in branch with "-":
+          BRANCH=${BRANCH//\//-}
+          echo "branch sanitized = '$BRANCH' "
