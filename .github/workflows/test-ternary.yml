@@ -1,0 +1,57 @@
+on:
+  push:
+    branches:
+      - test-workflows-ternary-exprs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    outputs:
+      single: ${{ steps.configure.outputs.single }}
+      single-false: ${{ steps.configure.outputs.single-false }}
+      single-empty-fallback: ${{ steps.configure.outputs.single-empty-fallback }}
+      single-false-empty-fallback: ${{ steps.configure.outputs.single-false-empty-fallback }}
+      double: ${{ steps.configure.outputs.double }}
+      double-false-1: ${{ steps.configure.outputs.double-false-1 }}
+      double-false-2: ${{ steps.configure.outputs.double-false-2 }}
+      triple: ${{ steps.configure.outputs.triple }}
+      triple-false-1: ${{ steps.configure.outputs.triple-false-1}}
+      triple-false-2: ${{ steps.configure.outputs.triple-false-2}}
+      triple-false-3: ${{ steps.configure.outputs.triple-false-3}}
+    steps:
+      - id: configure
+        env:
+          FOO: "foo"
+          BAR: "bar"
+          BAZ: "baz"
+          NOT_TRUE: "not-true"
+        run: |
+          echo "single=${{ env.FOO == 'foo' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "single-false=${{ env.FOO == 'notfoo' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "single-empty-fallback=${{ env.FOO == 'notfoo' && true || env.NOT_EXISTENT }}" >> $GITHUB_OUTPUT
+          echo "single-false-empty-fallback=${{ env.FOO == 'notfoo' && true || env.NOT_EXISTENT }}" >> $GITHUB_OUTPUT
+          echo "double=${{ env.FOO == 'foo' && env.BAR == 'bar' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "double-false-1=${{ env.FOO == 'notfoo' && env.BAR == 'bar' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "double-false-2=${{ env.FOO == 'foo' && env.BAR == 'notbar' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "triple=${{ env.FOO == 'foo' && env.BAR == 'bar' && env.BAZ == 'baz' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "triple-false-1=${{ env.FOO == 'notfoo' && env.BAR == 'bar' && env.BAZ == 'baz' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "triple-false-2=${{ env.FOO == 'foo' && env.BAR == 'notbar' && env.BAZ == 'baz' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+          echo "triple-false-3=${{ env.FOO == 'foo' && env.BAR == 'bar' && env.BAZ == 'notbaz' && true || env.NOT_TRUE }}" >> $GITHUB_OUTPUT
+  output:
+    runs-on: ubuntu-latest
+    needs: [configure]
+    steps:
+      - run: |
+          echo "single=${{ needs.configure.outputs.single }}"
+          echo "single-false=${{ needs.configure.outputs.single-false }}"
+          echo "single-empty-fallback=${{needs.configure.outputs.single-empty-fallback}}"
+          echo "single-false-empty-fallback=${{needs.configure.outputs.single-false-empty-fallback}}"
+          echo "double=${{needs.configure.outputs.double}}"
+          echo "double-false-1=${{needs.configure.outputs.double-false-1}}"
+          echo "double-false-2=${{needs.configure.outputs.double-false-2}}"
+          echo "triple=${{needs.configure.outputs.triple}}"
+          echo "triple-false-1=${{needs.configure.outputs.triple-false-1}}"
+          echo "triple-false-2=${{needs.configure.outputs.triple-false-2}}"
+          echo "triple-false-3=${{needs.configure.outputs.triple-false-3}}"
