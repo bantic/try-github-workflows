@@ -1,0 +1,5 @@
+name: "node16-test"
+description: "node16 test"
+runs:
+  using: node16
+  main: ./index.js
