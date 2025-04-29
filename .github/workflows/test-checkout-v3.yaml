@@ -1,0 +1,10 @@
+on:
+  push:
+    branches:
+      - bantic/test-checkout-v3
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.6.0
+      - run: ls -la
