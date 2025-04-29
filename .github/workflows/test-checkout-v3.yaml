@@ -6,5 +6,5 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@latest
       - uses: ./actions/node16-test
