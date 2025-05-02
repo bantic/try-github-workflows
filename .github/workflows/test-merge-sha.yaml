@@ -14,12 +14,12 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           path: base
-          ref: ${{ github.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
       - name: head
         uses: actions/checkout@v4.2.2
         with:
           path: head
-          ref: ${{ github.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: sha
         uses: actions/checkout@v4.2.2
         with:
