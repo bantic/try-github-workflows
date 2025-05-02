@@ -1,0 +1,35 @@
+name: test merge sha
+
+on:
+  pull_request:
+    branches:
+      - "bantic/test-merge-sha-*"
+
+jobs:
+  check-file:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: base
+        uses: actions/checkout@v4.2.2
+        with:
+          path: base
+          ref: ${{ github.pull_request.base.sha }}
+      - name: head
+        uses: actions/checkout@v4.2.2
+        with:
+          path: head
+          ref: ${{ github.pull_request.head.sha }}
+      - name: sha
+        uses: actions/checkout@v4.2.2
+        with:
+          path: sha
+          ref: ${{ github.sha }}
+      - name: Cat files
+        run: |
+          echo "base"
+          cat base/test-merge-sha
+          echo "head"
+          cat head/test-merge-sha
+          echo "sha"
+          cat sha/test-merge-sha
