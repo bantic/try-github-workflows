@@ -1,0 +1,57 @@
+name: test merge sha 2
+
+on:
+  pull_request:
+    branches:
+      - "bantic/test-merge-sha-v2-*"
+
+jobs:
+  check-file:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: base (branch)
+        uses: actions/checkout@v4.2.2
+        with:
+          path: base-branch
+          ref: bantic/test-merge-sha-base
+      - name: base (event)
+        uses: actions/checkout@v4.2.2
+        with:
+          path: base-event
+          ref: ${{ github.event.pull_request.base.sha }}
+      - name: head
+        uses: actions/checkout@v4.2.2
+        with:
+          path: head
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: sha
+        uses: actions/checkout@v4.2.2
+        with:
+          path: sha
+          ref: ${{ github.sha }}
+      - name: Cat files
+        run: |
+          echo "==base-branch=="
+          cd base-branch
+          echo $(git rev-parse HEAD)
+          cd ..
+          echo "==========="
+
+          echo "==base-event=="
+          cd base-event
+          echo $(git rev-parse HEAD)
+          cd ..
+          echo "==========="
+
+          echo "==head=="
+          cd head
+          echo $(git rev-parse HEAD)
+          cd ..
+          echo "==========="
+
+          echo "==sha=="
+          cd sha
+          echo $(git rev-parse HEAD)
+          cd ..
+          echo "==========="
