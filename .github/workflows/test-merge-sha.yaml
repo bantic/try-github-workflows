@@ -32,11 +32,30 @@ jobs:
           ref: ${{ github.sha }}
       - name: Cat files
         run: |
-          echo "base-branch"
+          echo "==base-branch=="
+          cd base-branch
+          echo $(git rev-parse HEAD)
+          cd ..
           cat base-branch/test-merge-sha
-          echo "base-event"
+          echo "==========="
+
+          echo "==base-event=="
+          cd base-event
+          echo $(git rev-parse HEAD)
+          cd ..
           cat base-event/test-merge-sha
-          echo "head"
+          echo "==========="
+
+          echo "==head=="
+          cd head
+          echo $(git rev-parse HEAD)
+          cd ..
           cat head/test-merge-sha
-          echo "sha"
+          echo "==========="
+
+          echo "==sha=="
+          cd sha
+          echo $(git rev-parse HEAD)
+          cd ..
           cat sha/test-merge-sha
+          echo "==========="
