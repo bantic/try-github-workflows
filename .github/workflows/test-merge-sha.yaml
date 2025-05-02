@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           path: base
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: bantic/test-merge-sha-base
       - name: head
         uses: actions/checkout@v4.2.2
         with:
