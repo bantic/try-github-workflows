@@ -10,11 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: base
+      - name: base (branch)
         uses: actions/checkout@v4.2.2
         with:
-          path: base
+          path: base-branch
           ref: bantic/test-merge-sha-base
+      - name: base (event)
+        uses: actions/checkout@v4.2.2
+        with:
+          path: base-event
+          ref: ${{ github.event.pull_request.base.sha }}
       - name: head
         uses: actions/checkout@v4.2.2
         with:
@@ -27,8 +32,10 @@ jobs:
           ref: ${{ github.sha }}
       - name: Cat files
         run: |
-          echo "base"
-          cat base/test-merge-sha
+          echo "base-branch"
+          cat base-branch/test-merge-sha
+          echo "base-sha"
+          cat base-sha/test-merge-sha
           echo "head"
           cat head/test-merge-sha
           echo "sha"
