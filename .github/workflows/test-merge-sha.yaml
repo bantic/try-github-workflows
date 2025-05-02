@@ -34,8 +34,8 @@ jobs:
         run: |
           echo "base-branch"
           cat base-branch/test-merge-sha
-          echo "base-sha"
-          cat base-sha/test-merge-sha
+          echo "base-event"
+          cat base-event/test-merge-sha
           echo "head"
           cat head/test-merge-sha
           echo "sha"
