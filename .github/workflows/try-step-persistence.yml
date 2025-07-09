@@ -1,0 +1,16 @@
+# Tests if the current working directory resets between steps
+name: Test Step Persistence of pwd
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  dump-context:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: mkdir -p a/b/c
+      - run: ls
+      - run: cd a
+      - run: pwd
