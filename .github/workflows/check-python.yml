@@ -1,0 +1,13 @@
+name: Check if python can be used without setup-python
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: which python
+      - run: python -V
