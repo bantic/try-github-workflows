@@ -1,4 +1,4 @@
-name: Test Timeout Minutes
+name: Test Rollup Jobs
 
 on:
   pull_request:
@@ -8,9 +8,6 @@ jobs:
   timeout-job:
     runs-on: ubuntu-latest
     timeout-minutes: 1
-    outputs:
-      shard-1-result: ${{ steps.set-result-1.outputs.result }}
-      shard-2-result: ${{ steps.set-result-2.outputs.result }}
 
     steps:
       - name: Long running step (will timeout)
