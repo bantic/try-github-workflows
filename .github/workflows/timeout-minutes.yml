@@ -31,8 +31,7 @@ jobs:
           echo "Shard ${{ matrix.shard }}: Starting operation"
           if [ "${{ matrix.shard }}" == "1" ]; then
             echo "Shard 1: Sleeping for 90 seconds (timeout is 60 seconds)"
-            # sleep 90
-            exit 1
+            sleep 90
             echo "This should never print due to timeout"
           else
             echo "Shard 2: Sleeping for 10 seconds (will complete successfully)"
