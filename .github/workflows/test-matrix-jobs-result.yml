@@ -37,30 +37,6 @@ jobs:
     if: always()
 
     steps:
-      - name: Check if success() is true
-        if: success()
-        run: echo "✓ success() evaluates to TRUE"
-
-      - name: Check if success() is false
-        if: ${{ !success() }}
-        run: echo "✗ success() evaluates to FALSE"
-
-      - name: Check if failure() is true
-        if: failure()
-        run: echo "✓ failure() evaluates to TRUE"
-
-      - name: Check if failure() is false
-        if: ${{ !failure() }}
-        run: echo "✗ failure() evaluates to FALSE"
-
-      - name: Check if cancelled() is true
-        if: cancelled()
-        run: echo "✓ cancelled() evaluates to TRUE"
-
-      - name: Check if cancelled() is false
-        if: ${{ !cancelled() }}
-        run: echo "✗ cancelled() evaluates to FALSE"
-
       - name: Report unified status
         if: always()
         run: |
@@ -105,12 +81,6 @@ jobs:
             echo "This should never print due to timeout"
           fi
 
-      - name: Post-timeout step (runs on failure or cancellation)
-        if: failure() || cancelled()
-        run: |
-          echo "Shard ${{ matrix.shard }}: This runs if job failed or was cancelled"
-          echo "Job status: ${{ job.status }}"
-
   # Reporter for success/timeout matrix job
   report-success-timeout:
     name: Report Success/Timeout Matrix Status
@@ -119,30 +89,6 @@ jobs:
     if: always()
 
     steps:
-      - name: Check if success() is true
-        if: success()
-        run: echo "✓ success() evaluates to TRUE"
-
-      - name: Check if success() is false
-        if: ${{ !success() }}
-        run: echo "✗ success() evaluates to FALSE"
-
-      - name: Check if failure() is true
-        if: failure()
-        run: echo "✓ failure() evaluates to TRUE"
-
-      - name: Check if failure() is false
-        if: ${{ !failure() }}
-        run: echo "✗ failure() evaluates to FALSE"
-
-      - name: Check if cancelled() is true
-        if: cancelled()
-        run: echo "✓ cancelled() evaluates to TRUE"
-
-      - name: Check if cancelled() is false
-        if: ${{ !cancelled() }}
-        run: echo "✗ cancelled() evaluates to FALSE"
-
       - name: Report unified status
         if: always()
         run: |
