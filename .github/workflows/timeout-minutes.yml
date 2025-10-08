@@ -35,7 +35,7 @@ jobs:
             echo "This should never print due to timeout"
           else
             echo "Shard 2: Sleeping for 10 seconds (will complete successfully)"
-            sleep 10
+            sleep 90
             echo "Shard 2: Completed successfully"
           fi
 
