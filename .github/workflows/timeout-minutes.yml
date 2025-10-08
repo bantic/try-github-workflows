@@ -1,0 +1,72 @@
+name: Test Timeout Minutes
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  sharded-job:
+    name: Sharded Job (Shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    strategy:
+      matrix:
+        shard: [1, 2]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initial step
+        run: |
+          echo "Starting shard ${{ matrix.shard }}"
+          echo "This step should complete normally"
+
+      - name: Long running step (will timeout)
+        run: |
+          echo "Shard ${{ matrix.shard }}: Starting long operation that will exceed timeout"
+          echo "Sleeping for 90 seconds (timeout is 60 seconds)"
+          sleep 90
+          echo "This should never print due to timeout"
+
+      - name: Step after timeout (should not run normally)
+        run: |
+          echo "Shard ${{ matrix.shard }}: This step runs after the timeout step"
+          echo "This should not execute in normal flow"
+
+      - name: Cleanup step (runs on failure or cancellation)
+        if: failure() || cancelled()
+        run: |
+          echo "Shard ${{ matrix.shard }}: CLEANUP - This runs if job failed or was cancelled"
+          echo "Job status: ${{ job.status }}"
+          echo "Testing if this executes after timeout cancellation"
+
+      - name: Another conditional step (runs on failure or cancellation)
+        if: failure() || cancelled()
+        run: |
+          echo "Shard ${{ matrix.shard }}: CONDITIONAL - Another step that should run on timeout"
+          echo "Verifying multiple conditional steps work after timeout"
+
+  dependent-job:
+    name: Dependent Job (Runs on Failure/Cancellation)
+    runs-on: ubuntu-latest
+    needs: sharded-job
+    if: failure() || cancelled()
+
+    steps:
+      - name: Check sharded job status
+        run: |
+          echo "Dependent job is running!"
+          echo "This job should run because sharded-job timed out"
+          echo "Needs context: ${{ toJSON(needs) }}"
+
+      - name: Verify timeout behavior
+        run: |
+          echo "Testing if dependent job runs when parent times out"
+          echo "Expected: This should execute because sharded-job was cancelled due to timeout"
+
+      - name: Final verification
+        run: |
+          echo "All shards timed out, and this dependent job executed successfully"
+          echo "Timeout-minutes test complete"
