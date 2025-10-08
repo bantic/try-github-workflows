@@ -9,6 +9,9 @@ jobs:
     name: Sharded Job (Shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 1
+    outputs:
+      shard-1-result: ${{ steps.set-result-1.outputs.result }}
+      shard-2-result: ${{ steps.set-result-2.outputs.result }}
     strategy:
       matrix:
         shard: [1, 2]
@@ -23,17 +26,27 @@ jobs:
           echo "Starting shard ${{ matrix.shard }}"
           echo "This step should complete normally"
 
-      - name: Long running step (will timeout)
+      - name: Long running step (will timeout for shard 1 only)
         run: |
-          echo "Shard ${{ matrix.shard }}: Starting long operation that will exceed timeout"
-          echo "Sleeping for 90 seconds (timeout is 60 seconds)"
-          sleep 90
-          echo "This should never print due to timeout"
+          echo "Shard ${{ matrix.shard }}: Starting operation"
+          if [ "${{ matrix.shard }}" == "1" ]; then
+            echo "Shard 1: Sleeping for 90 seconds (timeout is 60 seconds)"
+            sleep 90
+            echo "This should never print due to timeout"
+          else
+            echo "Shard 2: Sleeping for 10 seconds (will complete successfully)"
+            sleep 10
+            echo "Shard 2: Completed successfully"
+          fi
 
-      - name: Step after timeout (should not run normally)
+      - name: Step after long operation
         run: |
-          echo "Shard ${{ matrix.shard }}: This step runs after the timeout step"
-          echo "This should not execute in normal flow"
+          echo "Shard ${{ matrix.shard }}: This step runs after the long operation"
+          if [ "${{ matrix.shard }}" == "1" ]; then
+            echo "Shard 1: This should NOT execute due to timeout"
+          else
+            echo "Shard 2: This SHOULD execute normally"
+          fi
 
       - name: Cleanup step (runs on failure or cancellation)
         if: failure() || cancelled()
@@ -47,6 +60,20 @@ jobs:
         run: |
           echo "Shard ${{ matrix.shard }}: CONDITIONAL - Another step that should run on timeout"
           echo "Verifying multiple conditional steps work after timeout"
+
+      - name: Set shard 1 result
+        id: set-result-1
+        if: always() && matrix.shard == 1
+        run: |
+          echo "Shard 1 final status: ${{ job.status }}"
+          echo "result=${{ job.status }}" >> $GITHUB_OUTPUT
+
+      - name: Set shard 2 result
+        id: set-result-2
+        if: always() && matrix.shard == 2
+        run: |
+          echo "Shard 2 final status: ${{ job.status }}"
+          echo "result=${{ job.status }}" >> $GITHUB_OUTPUT
 
   dependent-job:
     name: Dependent Job (Runs on Failure/Cancellation)
@@ -68,5 +95,57 @@ jobs:
 
       - name: Final verification
         run: |
-          echo "All shards timed out, and this dependent job executed successfully"
-          echo "Timeout-minutes test complete"
+          echo "Dependent job executed because at least one shard timed out (shard 1)"
+          echo "Shard 2 should have completed successfully"
+
+  status-reporter:
+    name: Status Reporter (Always Runs)
+    runs-on: ubuntu-latest
+    needs: sharded-job
+    if: always()
+
+    steps:
+      - name: Check if success() is true
+        if: success()
+        run: echo "✓ success() evaluates to TRUE"
+
+      - name: Check if success() is false
+        if: ${{ !success() }}
+        run: echo "✗ success() evaluates to FALSE"
+
+      - name: Check if failure() is true
+        if: failure()
+        run: echo "✓ failure() evaluates to TRUE"
+
+      - name: Check if failure() is false
+        if: ${{ !failure() }}
+        run: echo "✗ failure() evaluates to FALSE"
+
+      - name: Check if cancelled() is true
+        if: cancelled()
+        run: echo "✓ cancelled() evaluates to TRUE"
+
+      - name: Check if cancelled() is false
+        if: ${{ !cancelled() }}
+        run: echo "✗ cancelled() evaluates to FALSE"
+
+      - name: Report all shard statuses
+        if: always()
+        run: |
+          echo ""
+          echo "=== Shard Status Report ==="
+          echo ""
+          echo "Overall sharded job result: ${{ needs.sharded-job.result }}"
+          echo ""
+          echo "Individual shard results:"
+          echo "- Shard 1 result: ${{ needs.sharded-job.outputs.shard-1-result }}"
+          echo "- Shard 2 result: ${{ needs.sharded-job.outputs.shard-2-result }}"
+          echo ""
+          echo "Full needs context:"
+          echo '${{ toJSON(needs) }}'
+          echo ""
+          echo "Expected behavior:"
+          echo "- Shard 1: Should be 'cancelled' due to timeout"
+          echo "- Shard 2: Should be 'success'"
+          echo "- Overall job: Should be 'failure' because one shard failed"
+          echo "- failure() should be true, success() should be false"
