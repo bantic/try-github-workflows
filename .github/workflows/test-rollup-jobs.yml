@@ -1,0 +1,70 @@
+name: Test Rollup Jobs
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # always times out
+  timeout-job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - name: Long running step (will timeout)
+        run: |
+          sleep 90
+
+  # this rollup job shows that "cancelled()" works counter-intuitively.
+  # Even though the dependent job timed out and was cancelled,
+  # this job is skipped (because `cancelled()` refers to this job's status, so it is not `true`)
+  timeout-job-incorrect-result:
+    runs-on: ubuntu-latest
+    needs: timeout-job
+    if: ${{ cancelled() }}
+    steps:
+      - run: exit 1
+
+  # this rollup job correctly checks the status of the dependent job.
+  # this job runs "always" but fails ('exit 1') if `needs.tieout-job.result` is
+  # a failure or cancelled (ie "not success")
+  timeout-job-correct-result:
+    runs-on: ubuntu-latest
+    needs: timeout-job
+    if: ${{ always() }}
+    steps:
+      - if: ${{ needs.timeout-job.result != 'success' }}
+        run: exit 1
+
+  # alt approach to the job above using the result check in the job.if
+  timeout-job-correct-result-alt:
+    runs-on: ubuntu-latest
+    needs: timeout-job
+    if: ${{ needs.timeout-job.result != 'success' }}
+    steps:
+      - run: exit 1
+
+  # This job always fails
+  failure-job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+
+  # This rollup job shows that `if failure()` works as we expect, unlike `if cancelled()`:
+  # it is "true" bc the dependent job failed
+  failure-job-result:
+    runs-on: ubuntu-latest
+    needs: failure-job
+    if: ${{ failure() }}
+    steps:
+      - run: exit 1
+
+  # This rollup job depends on both the failure and timeout jobs.
+  # It uses the robust technique of always running and checking the result of the dependent job(s)
+  rollup-job-correct-result:
+    runs-on: ubuntu-latest
+    needs: [failure-job, timeout-job]
+    if: ${{ always() }}
+    steps:
+      - if: ${{ needs.failure-job.result != 'success' || needs.timeout-job.result != 'success' }}
+        run: exit 1
